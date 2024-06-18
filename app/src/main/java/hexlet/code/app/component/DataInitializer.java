@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-//@Profile("development") TODO разобраться как актвировать профайлы
+@Profile("development")
 public class DataInitializer implements ApplicationRunner {
     @Autowired
     private final UserRepository repository;

@@ -1,6 +1,6 @@
 package hexlet.code.app.config;
 
-import hexlet.code.app.user.SimpleUserDetailsService;
+import hexlet.code.app.user.service.SimpleUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;

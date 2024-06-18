@@ -1,5 +1,9 @@
-package hexlet.code.app.user;
+package hexlet.code.app.user.api;
 
+import hexlet.code.app.user.dto.UserCreateDTO;
+import hexlet.code.app.user.dto.UserDTO;
+import hexlet.code.app.user.service.UserService;
+import hexlet.code.app.user.dto.UserUpdateDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

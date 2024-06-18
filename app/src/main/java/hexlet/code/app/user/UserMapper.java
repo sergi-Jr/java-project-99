@@ -1,6 +1,9 @@
 package hexlet.code.app.user;
 
 import hexlet.code.app.mapper.JsonNullableMapper;
+import hexlet.code.app.user.dto.UserCreateDTO;
+import hexlet.code.app.user.dto.UserDTO;
+import hexlet.code.app.user.dto.UserUpdateDTO;
 import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;

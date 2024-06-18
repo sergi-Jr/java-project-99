@@ -1,6 +1,12 @@
-package hexlet.code.app.user;
+package hexlet.code.app.user.service;
 
 import hexlet.code.app.exception.ResourceNotFoundException;
+import hexlet.code.app.user.User;
+import hexlet.code.app.user.UserMapper;
+import hexlet.code.app.user.UserRepository;
+import hexlet.code.app.user.dto.UserCreateDTO;
+import hexlet.code.app.user.dto.UserDTO;
+import hexlet.code.app.user.dto.UserUpdateDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

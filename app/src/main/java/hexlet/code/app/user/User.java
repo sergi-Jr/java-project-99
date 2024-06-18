@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,10 +33,8 @@ public class User implements BaseEntity, UserDetails {
     @GeneratedValue(strategy = IDENTITY)
     private long id;
 
-    @NotNull
     private String firstName;
 
-    @NotNull
     private String lastName;
 
     @Email

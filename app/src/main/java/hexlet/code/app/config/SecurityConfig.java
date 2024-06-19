@@ -34,10 +34,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        .requestMatchers("/welcome").permitAll()
-                        .anyRequest().authenticated())
+                        //.requestMatchers("/login").permitAll()
+                        //.requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        //.requestMatchers("/welcome").permitAll()
+                        .anyRequest()./*authenticated()*/permitAll())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(rs -> rs.jwt(j -> j.decoder(jwtDecoder)))
                 .httpBasic(Customizer.withDefaults())

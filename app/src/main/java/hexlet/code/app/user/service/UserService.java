@@ -1,6 +1,7 @@
 package hexlet.code.app.user.service;
 
 import hexlet.code.app.exception.ResourceNotFoundException;
+import hexlet.code.app.role.type.UserRoleType;
 import hexlet.code.app.user.User;
 import hexlet.code.app.user.UserMapper;
 import hexlet.code.app.user.UserRepository;
@@ -36,6 +37,7 @@ public class UserService {
     @Transactional
     public UserDTO add(UserCreateDTO data) {
         User user = mapper.map(data);
+        user.addUserRole(UserRoleType.USER);
         repository.save(user);
         return mapper.map(user);
     }

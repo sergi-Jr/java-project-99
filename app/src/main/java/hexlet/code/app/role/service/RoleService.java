@@ -49,13 +49,7 @@ public class RoleService {
                 return true;
             }
         }
-
         return false;
-    }
-
-    public boolean isTrueUserOwnerByUserId(Long id) {
-        long userId = ((User) getCurrentAuth().getPrincipal()).getId();
-        return userId == id;
     }
 
 //TODO create isTrueOwner by taskId method

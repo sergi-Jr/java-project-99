@@ -33,5 +33,7 @@ public abstract class UserMapper {
 
     public abstract UserDTO map(User model);
 
+    public abstract UserCreateDTO mapToCreateDTO(User model);
+
     public abstract void update(UserUpdateDTO dto, @MappingTarget User model);
 }

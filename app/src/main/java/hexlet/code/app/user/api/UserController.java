@@ -52,16 +52,16 @@ public class UserController {
 
     @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@RoleService.isTrueUserOwnerByUserId(#id) AND"
-            + "@RoleService.hasAnyRoleByUserId(@UserRole.owner)")
+    @PreAuthorize("authentication.principal.id == #id AND"
+            + "@RoleService.hasAnyRoleByUserId(@UserRole.user)")
     public UserDTO update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO data) {
         return userService.update(id, data);
     }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("@RoleService.isTrueUserOwnerByUserId(#id) AND"
-            + "@RoleService.hasAnyRoleByUserId(@UserRole.owner)")
+    @PreAuthorize("authentication.principal.id == #id AND"
+            + "@RoleService.hasAnyRoleByUserId(@UserRole.user)")
     public void delete(@PathVariable Long id) {
         userService.delete(id);
     }

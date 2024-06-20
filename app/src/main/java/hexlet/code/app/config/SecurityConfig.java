@@ -33,10 +33,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        //.requestMatchers("/login").permitAll()
-                        //.requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        //.requestMatchers("/welcome").permitAll()
-                        .anyRequest()./*authenticated()*/permitAll())
+                        .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("/welcome").permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(rs -> rs.jwt(j -> j.decoder(jwtDecoder)))
                 .httpBasic(Customizer.withDefaults())
@@ -44,12 +43,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class).build();
+    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class).build();
     }
 
+
     @Bean
-    public AuthenticationProvider daoAuthProvider(AuthenticationManagerBuilder builder) {
+    public AuthenticationProvider daoAuthProvider(AuthenticationManagerBuilder managerBuilder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(detailsService);
         provider.setPasswordEncoder(passwordEncoder);

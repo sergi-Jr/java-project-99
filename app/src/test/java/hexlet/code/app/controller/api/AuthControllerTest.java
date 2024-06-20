@@ -2,11 +2,7 @@ package hexlet.code.app.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.app.authentication.model.AuthRequest;
-import hexlet.code.app.user.User;
 import hexlet.code.app.user.UserRepository;
-import net.datafaker.Faker;
-import org.instancio.Instancio;
-import org.instancio.Select;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

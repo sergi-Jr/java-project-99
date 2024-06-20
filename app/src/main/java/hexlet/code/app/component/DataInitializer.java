@@ -1,5 +1,8 @@
 package hexlet.code.app.component;
 
+import hexlet.code.app.role.repository.UserRoleRepository;
+import hexlet.code.app.role.type.UserRoleType;
+import hexlet.code.app.user.User;
 import hexlet.code.app.user.dto.UserCreateDTO;
 import hexlet.code.app.user.UserMapper;
 import hexlet.code.app.user.UserRepository;
@@ -15,7 +18,10 @@ import org.springframework.stereotype.Component;
 @Profile("development")
 public class DataInitializer implements ApplicationRunner {
     @Autowired
-    private final UserRepository repository;
+    private final UserRepository userRepository;
+
+    @Autowired
+    private final UserRoleRepository roleRepository;
 
     @Autowired
     private final UserMapper mapper;
@@ -25,6 +31,8 @@ public class DataInitializer implements ApplicationRunner {
         UserCreateDTO data = new UserCreateDTO();
         data.setEmail("hexlet@example.com");
         data.setPassword("qwerty");
-        repository.save(mapper.map(data));
+        User user = mapper.map(data);
+        user.addUserRole(UserRoleType.ADMIN);
+        userRepository.save(user);
     }
 }

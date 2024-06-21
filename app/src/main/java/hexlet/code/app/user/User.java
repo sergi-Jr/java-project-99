@@ -5,7 +5,7 @@ import hexlet.code.app.role.model.TaskRole;
 import hexlet.code.app.role.model.UserRole;
 import hexlet.code.app.role.type.TaskRoleType;
 import hexlet.code.app.role.type.UserRoleType;
-import hexlet.code.app.task.Task;
+import hexlet.code.app.task.model.Task;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;

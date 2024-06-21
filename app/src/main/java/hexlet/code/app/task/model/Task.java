@@ -14,3 +14,4 @@ public class Task {
     @GeneratedValue(strategy = IDENTITY)
     private long id;
 }
+

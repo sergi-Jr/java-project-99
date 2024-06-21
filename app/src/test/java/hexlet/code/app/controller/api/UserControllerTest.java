@@ -8,6 +8,7 @@ import hexlet.code.app.user.UserRepository;
 import net.datafaker.Faker;
 import org.instancio.Instancio;
 import org.instancio.Select;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,8 +47,12 @@ class UserControllerTest {
     @Autowired
     private UserMapper userMapper;
 
+    private User wrong;
+
+    private User user;
+
     private User generateUser() {
-        User user = Instancio.of(User.class)
+        User generatedUser = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
                 .ignore(Select.field(User::getCreatedAt))
                 .ignore(Select.field(User::getUpdatedAt))
@@ -58,8 +63,17 @@ class UserControllerTest {
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .supply(Select.field(User::getPassword), () -> faker.internet().password(3, 10))
                 .create();
-        user.addUserRole(UserRoleType.ADMIN);
-        return user;
+        generatedUser.addUserRole(UserRoleType.ADMIN);
+        return generatedUser;
+    }
+
+    @BeforeEach
+    void setup() {
+        wrong = generateUser();
+        wrong.removeUserRole(UserRoleType.ADMIN);
+        user = generateUser();
+        repository.save(user);
+        repository.save(wrong);
     }
 
     @Test
@@ -85,17 +99,12 @@ class UserControllerTest {
 
     @Test
     public void testIndexForbidden() throws Exception {
-        User wrong = generateUser();
-        wrong.removeUserRole(UserRoleType.ADMIN);
         mockMvc.perform(get("/api/users").with(user(wrong)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void testShow() throws Exception {
-        User user = generateUser();
-        repository.save(user);
-
         MvcResult result = mockMvc.perform(get("/api/users/" + user.getId()).with(user(user)))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -110,74 +119,58 @@ class UserControllerTest {
 
     @Test
     public void testShowNoAuth() throws Exception {
-        User user = generateUser();
-        repository.save(user);
-
         mockMvc.perform(get("/api/users/" + user.getId()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void testShowForbidden() throws Exception {
-        User user = generateUser();
-        User wrong = generateUser();
-        wrong.removeUserRole(UserRoleType.ADMIN);
-        repository.save(user);
-        repository.save(wrong);
-
         mockMvc.perform(get("/api/users/" + user.getId()).with(user(wrong)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void testCreate() throws Exception {
-        User user = generateUser();
-        User admin = generateUser();
-        repository.save(admin);
+        User user1 = generateUser();
 
-        var request = post("/api/users").with(user(admin))
+        var request = post("/api/users").with(user(user))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user)));
+                .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user1)));
         mockMvc.perform(request)
                 .andExpect(status().isCreated());
-        Optional<User> opActual = repository.findByEmail(user.getEmail());
+        Optional<User> opActual = repository.findByEmail(user1.getEmail());
 
         assertThat(opActual).isNotNull();
         User actual = opActual.get();
-        assertThat(user.getEmail()).isEqualTo(actual.getEmail());
-        assertThat(user.getLastName()).isEqualTo(actual.getLastName());
-        assertThat(user.getFirstName()).isEqualTo(actual.getFirstName());
+        assertThat(user1.getEmail()).isEqualTo(actual.getEmail());
+        assertThat(user1.getLastName()).isEqualTo(actual.getLastName());
+        assertThat(user1.getFirstName()).isEqualTo(actual.getFirstName());
     }
 
     @Test
     void testCreateForbidden() throws Exception {
-        User user = generateUser();
-        User wrong = generateUser();
-        wrong.removeUserRole(UserRoleType.ADMIN);
-        repository.save(wrong);
+        User user1 = generateUser();
 
         var request = post("/api/users").with(user(wrong))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user)));
+                .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user1)));
         mockMvc.perform(request)
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void testCreateNoAuth() throws Exception {
-        User user = generateUser();
+        User user1 = generateUser();
 
         var request = post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user)));
+                .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user1)));
         mockMvc.perform(request)
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void testUpdate() throws Exception {
-        User user = generateUser();
-        repository.save(user);
         Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
 
         var request = put("/api/users/" + user.getId()).with(user(user))
@@ -196,8 +189,6 @@ class UserControllerTest {
 
     @Test
     public void testUpdateNoAuth() throws Exception {
-        User user = generateUser();
-        repository.save(user);
         Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
 
         var request = put("/api/users/" + user.getId())
@@ -209,10 +200,6 @@ class UserControllerTest {
 
     @Test
     public void testUpdateForbidden() throws Exception {
-        User user = generateUser();
-        User wrong = generateUser();
-        repository.save(wrong);
-        repository.save(user);
         Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
 
         var request = put("/api/users/" + user.getId()).with(user(wrong))
@@ -224,9 +211,6 @@ class UserControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-        User user = generateUser();
-        repository.save(user);
-
         var request = delete("/api/users/" + user.getId()).with(user(user));
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
@@ -237,9 +221,6 @@ class UserControllerTest {
 
     @Test
     public void testDeleteNoAuth() throws Exception {
-        User user = generateUser();
-        repository.save(user);
-
         var request = delete("/api/users/" + user.getId());
         mockMvc.perform(request)
                 .andExpect(status().isUnauthorized());
@@ -247,11 +228,6 @@ class UserControllerTest {
 
     @Test
     public void testDeleteForbidden() throws Exception {
-        User user = generateUser();
-        User wrong = generateUser();
-        repository.save(wrong);
-        repository.save(user);
-
         var request = delete("/api/users/" + user.getId()).with(user(wrong));
         mockMvc.perform(request)
                 .andExpect(status().isForbidden());

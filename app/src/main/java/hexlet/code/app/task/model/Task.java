@@ -1,4 +1,4 @@
-package hexlet.code.app.task;
+package hexlet.code.app.task.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -1,7 +1,7 @@
 package hexlet.code.app.role.model;
 
 import hexlet.code.app.role.type.TaskRoleType;
-import hexlet.code.app.task.Task;
+import hexlet.code.app.task.model.Task;
 import hexlet.code.app.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

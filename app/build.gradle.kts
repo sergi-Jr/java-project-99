@@ -35,6 +35,7 @@ dependencies {
     implementation("org.instancio:instancio-junit:4.8.0")
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
     implementation("org.postgresql:postgresql:42.1.4")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     annotationProcessor("org.projectlombok:lombok:1.18.32")

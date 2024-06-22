@@ -3,7 +3,9 @@ package hexlet.code.app.controller.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.app.task.dto.TaskStatusCreateDTO;
 import hexlet.code.app.task.mapper.TaskStatusMapper;
+import hexlet.code.app.task.model.Task;
 import hexlet.code.app.task.model.TaskStatus;
+import hexlet.code.app.task.repository.TaskRepository;
 import hexlet.code.app.task.repository.TaskStatusRepository;
 import hexlet.code.app.user.User;
 import hexlet.code.app.user.UserRepository;
@@ -46,6 +48,9 @@ class TaskStatusControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     private TaskStatusMapper taskStatusMapper;
@@ -175,5 +180,17 @@ class TaskStatusControllerTest {
         var request = delete("/api/task_statuses/" + status.getId());
         mockMvc.perform(request)
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testDeleteHasTask() throws Exception {
+        var task = new Task();
+        task.setTaskStatus(status);
+        task.setName("testName");
+        taskRepository.save(task);
+
+        var request = delete("/api/task_statuses/" + status.getId()).with(user(user));
+        mockMvc.perform(request)
+                .andExpect(status().isNotAcceptable());
     }
 }

@@ -1,6 +1,9 @@
 package hexlet.code.app.user.service;
 
 import hexlet.code.app.exception.ResourceNotFoundException;
+import hexlet.code.app.exception.UnableDeletionException;
+import hexlet.code.app.task.model.Task;
+import hexlet.code.app.task.repository.TaskRepository;
 import hexlet.code.app.user.User;
 import hexlet.code.app.user.UserMapper;
 import hexlet.code.app.user.UserRepository;
@@ -18,6 +21,9 @@ import java.util.List;
 public class UserService {
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     private UserMapper mapper;
@@ -50,6 +56,13 @@ public class UserService {
 
     @Transactional
     public void delete(Long id) {
+        List<Task> tasks = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found"))
+                .getTasks();
+
+        if (!tasks.isEmpty()) {
+            throw new UnableDeletionException("User has active tasks");
+        }
         repository.deleteById(id);
     }
 }

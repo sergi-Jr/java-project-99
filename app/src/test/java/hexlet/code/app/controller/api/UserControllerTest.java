@@ -1,6 +1,8 @@
 package hexlet.code.app.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.app.task.model.Task;
+import hexlet.code.app.task.repository.TaskStatusRepository;
 import hexlet.code.app.user.User;
 import hexlet.code.app.user.UserMapper;
 import hexlet.code.app.user.UserRepository;
@@ -42,6 +44,9 @@ class UserControllerTest {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private TaskStatusRepository statusRepository;
 
     @Autowired
     private UserMapper userMapper;
@@ -204,5 +209,18 @@ class UserControllerTest {
         var request = delete("/api/users/" + user.getId()).with(user(wrong));
         mockMvc.perform(request)
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testDeleteUserHasTask() throws Exception {
+        var task = new Task();
+        task.setTaskStatus(statusRepository.findBySlug("published").get());
+        task.setName("testName");
+        user.addTask(task);
+        repository.save(user);
+
+        var request = delete("/api/users/" + user.getId()).with(user(user));
+        mockMvc.perform(request)
+                .andExpect(status().isNotAcceptable());
     }
 }

@@ -1,7 +1,5 @@
 package hexlet.code.app.component;
 
-import hexlet.code.app.role.repository.UserRoleRepository;
-import hexlet.code.app.role.type.UserRoleType;
 import hexlet.code.app.task.model.TaskStatus;
 import hexlet.code.app.task.repository.TaskStatusRepository;
 import hexlet.code.app.user.User;
@@ -26,9 +24,6 @@ public class DataInitializer implements ApplicationRunner {
     private final TaskStatusRepository statusRepository;
 
     @Autowired
-    private final UserRoleRepository roleRepository;
-
-    @Autowired
     private final UserMapper mapper;
 
     @Override
@@ -42,7 +37,6 @@ public class DataInitializer implements ApplicationRunner {
         data.setEmail("hexlet@example.com");
         data.setPassword("qwerty");
         User user = mapper.map(data);
-        user.addUserRole(UserRoleType.ADMIN);
         userRepository.save(user);
     }
 

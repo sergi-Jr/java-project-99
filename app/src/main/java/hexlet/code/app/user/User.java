@@ -1,12 +1,9 @@
 package hexlet.code.app.user;
 
 import hexlet.code.app.model.BaseEntity;
-import hexlet.code.app.role.model.TaskRole;
-import hexlet.code.app.role.model.UserRole;
-import hexlet.code.app.role.type.TaskRoleType;
-import hexlet.code.app.role.type.UserRoleType;
 import hexlet.code.app.task.model.Task;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -14,11 +11,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -38,6 +33,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(name = "users")
 @Getter
 @Setter
+@ToString(onlyExplicitlyIncluded = true)
 public class User implements BaseEntity, UserDetails {
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -47,12 +43,11 @@ public class User implements BaseEntity, UserDetails {
 
     private String lastName;
 
-    @Email
-    @NotBlank
+    @Column(nullable = false)
+    @ToString.Include
     private String email;
 
-    @NotBlank
-    @Size(min = 3)
+    @Column(nullable = false)
     private String password;
 
     @CreatedDate
@@ -61,32 +56,18 @@ public class User implements BaseEntity, UserDetails {
     @LastModifiedDate
     private LocalDate updatedAt;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<UserRole> userRoles = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "assignee", cascade = CascadeType.ALL)
+    private List<Task> tasks = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<TaskRole> taskRoles = new ArrayList<>();
-
-    public void addUserRole(UserRoleType roleType) {
-        final UserRole role = new UserRole();
-        role.setType(roleType);
-        role.setUser(this);
-        userRoles.add(role);
+    public void addTask(Task task) {
+        tasks.add(task);
+        task.setAssignee(this);
     }
 
-    public void removeUserRole(UserRoleType roleType) {
-        userRoles.removeIf(ur -> ur.getType() == roleType);
+    public void removeTask(Task task) {
+        tasks.removeIf(t -> t.getId() == task.getId());
+        task.setAssignee(null);
     }
-
-    public void addTaskRole(Task task, TaskRoleType roleType) {
-        final TaskRole role = new TaskRole();
-        role.setType(roleType);
-        role.setUser(this);
-        role.setTask(task);
-        taskRoles.add(role);
-    }
-
-    //TODO create remove task role method
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

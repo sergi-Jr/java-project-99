@@ -151,7 +151,7 @@ class TaskStatusControllerTest {
 
     @Test
     public void testUpdateNoAuth() throws Exception {
-        Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
+        Map<String, String> data = Map.of("name", "newStatusName");
 
         var request = put("/api/task_statuses/" + status.getId())
                 .contentType(MediaType.APPLICATION_JSON)

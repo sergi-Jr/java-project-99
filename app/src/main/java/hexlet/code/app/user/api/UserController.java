@@ -31,37 +31,33 @@ public class UserController {
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@RoleService.hasAnyRoleByUserId(@UserRole.user)")
+    @PreAuthorize("isAuthenticated()")
     public List<UserDTO> index() {
         return userService.getAll();
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@RoleService.hasAnyRoleByUserId(@UserRole.user)")
     public UserDTO show(@PathVariable Long id) {
         return userService.getOneById(id);
     }
 
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("@RoleService.hasAnyRoleByUserId(@UserRole.admin)")
     public UserDTO create(@Valid @RequestBody UserCreateDTO data) {
         return userService.add(data);
     }
 
     @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("authentication.principal.id == #id AND"
-            + "@RoleService.hasAnyRoleByUserId(@UserRole.user)")
+    @PreAuthorize("authentication.principal.id == #id")
     public UserDTO update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO data) {
         return userService.update(id, data);
     }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("authentication.principal.id == #id AND"
-            + "@RoleService.hasAnyRoleByUserId(@UserRole.user)")
+    @PreAuthorize("authentication.principal.id == #id")
     public void delete(@PathVariable Long id) {
         userService.delete(id);
     }

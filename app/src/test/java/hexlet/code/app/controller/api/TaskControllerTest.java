@@ -1,14 +1,19 @@
 package hexlet.code.app.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.app.task.dto.TaskCreateDTO;
+import hexlet.code.app.task.mapper.TaskMapper;
+import hexlet.code.app.task.model.Task;
+import hexlet.code.app.task.repository.TaskRepository;
+import hexlet.code.app.task.repository.TaskStatusRepository;
 import hexlet.code.app.user.User;
-import hexlet.code.app.user.UserMapper;
 import hexlet.code.app.user.UserRepository;
 import net.datafaker.Faker;
 import org.instancio.Instancio;
 import org.instancio.Select;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class UserControllerTest {
+class TaskControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -41,14 +46,22 @@ class UserControllerTest {
     private ObjectMapper mapper;
 
     @Autowired
-    private UserRepository repository;
+    private TaskRepository repository;
 
     @Autowired
-    private UserMapper userMapper;
+    private TaskStatusRepository statusRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    private TaskMapper userMapper;
 
     private User wrong;
 
     private User user;
+
+    private Task task;
 
     private User generateUser() {
         User generatedUser = Instancio.of(User.class)
@@ -64,22 +77,36 @@ class UserControllerTest {
         return generatedUser;
     }
 
+    private Task generateTask() {
+        Task generatedTask = Instancio.of(Task.class)
+                .ignore(Select.field(Task::getId))
+                .ignore(Select.field(Task::getCreatedAt))
+                .ignore(Select.field(Task::getAssignee))
+                .ignore(Select.field(Task::getTaskStatus))
+                .supply(Select.field(Task::getName), () -> faker.name().name())
+                .create();
+
+        return generatedTask;
+    }
+
     @BeforeEach
     void setup() {
+        repository.deleteAll();
+
         wrong = generateUser();
         user = generateUser();
-        repository.save(user);
-        repository.save(wrong);
+        userRepository.save(user);
+        userRepository.save(wrong);
+
+        task = generateTask();
+        var ts = statusRepository.findBySlug("draft").get();
+        task.setTaskStatus(ts);
+        repository.save(task);
     }
 
     @Test
     public void testIndexWithAuth() throws Exception {
-        User user1 = generateUser();
-        User user2 = generateUser();
-        repository.save(user1);
-        repository.save(user2);
-
-        MvcResult result = mockMvc.perform(get("/api/users").with(user(user1)))
+        MvcResult result = mockMvc.perform(get("/api/tasks").with(user(user)))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -89,82 +116,80 @@ class UserControllerTest {
 
     @Test
     public void testIndexNoAuth() throws Exception {
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void testShow() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/users/" + user.getId()).with(user(user)))
+        MvcResult result = mockMvc.perform(get("/api/tasks/" + task.getId()).with(user(user)))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
 
         assertThatJson(body).and(
-                v -> v.node("email").isEqualTo(user.getEmail()),
-                v -> v.node("firstName").isEqualTo(user.getFirstName()),
-                v -> v.node("lastName").isEqualTo(user.getLastName())
+                v -> v.node("title").isEqualTo(task.getName()),
+                v -> v.node("status").isEqualTo(task.getTaskStatus().getSlug())
         );
     }
 
     @Test
     public void testShowNoAuth() throws Exception {
-        mockMvc.perform(get("/api/users/" + user.getId()))
+        mockMvc.perform(get("/api/tasks/" + task.getId()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void testCreate() throws Exception {
-        User user1 = generateUser();
+        TaskCreateDTO dto = new TaskCreateDTO();
+        dto.setTitle("title");
+        dto.setStatus("testStatus");
+        dto.setAssigneeId(JsonNullable.of(user.getId()));
 
-        var request = post("/api/users").with(user(user))
+        var request = post("/api/tasks").with(user(user))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user1)));
+                .content(mapper.writeValueAsString(dto));
         mockMvc.perform(request)
                 .andExpect(status().isCreated());
-        Optional<User> opActual = repository.findByEmail(user1.getEmail());
-
-        assertThat(opActual).isNotNull();
-        User actual = opActual.get();
-        assertThat(user1.getEmail()).isEqualTo(actual.getEmail());
-        assertThat(user1.getLastName()).isEqualTo(actual.getLastName());
-        assertThat(user1.getFirstName()).isEqualTo(actual.getFirstName());
     }
 
     @Test
     void testCreateNoAuth() throws Exception {
-        User user1 = generateUser();
+        TaskCreateDTO dto = new TaskCreateDTO();
+        dto.setTitle("title");
+        dto.setStatus("testStatus");
 
-        var request = post("/api/users")
+        var request = post("/api/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user1)));
+                .content(mapper.writeValueAsString(dto));
         mockMvc.perform(request)
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void testUpdate() throws Exception {
-        Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
+        Map<String, String> data = Map.of("index", "100", "title", "newName");
+        user.addTask(task);
+        userRepository.save(user);
 
-        var request = put("/api/users/" + user.getId()).with(user(user))
+        var request = put("/api/tasks/" + task.getId()).with(user(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(data));
         mockMvc.perform(request)
                 .andExpect(status().isOk());
-        Optional<User> opActual = repository.findById(user.getId());
+        Optional<Task> opActual = repository.findById(task.getId());
 
         assertThat(opActual).isNotNull();
-        User actual = opActual.get();
-        assertThat(data).containsEntry("email", actual.getEmail());
-        assertThat(user.getLastName()).isEqualTo(actual.getLastName());
-        assertThat(data).containsEntry("firstName", actual.getFirstName());
+        Task actual = opActual.get();
+        assertThat(data).containsEntry("index", String.valueOf(actual.getIndex()));
+        assertThat(data).containsEntry("title", actual.getName());
     }
 
     @Test
     public void testUpdateNoAuth() throws Exception {
-        Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
+        Map<String, String> data = Map.of("index", "100", "name", "newName");
 
-        var request = put("/api/users/" + user.getId())
+        var request = put("/api/tasks/" + task.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(data));
         mockMvc.perform(request)
@@ -173,9 +198,9 @@ class UserControllerTest {
 
     @Test
     public void testUpdateForbidden() throws Exception {
-        Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
+        Map<String, String> data = Map.of("index", "100", "name", "newName");
 
-        var request = put("/api/users/" + user.getId()).with(user(wrong))
+        var request = put("/api/tasks/" + task.getId()).with(user(wrong))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(data));
         mockMvc.perform(request)
@@ -184,24 +209,27 @@ class UserControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-        var request = delete("/api/users/" + user.getId()).with(user(user));
+        user.addTask(task);
+        userRepository.save(user);
+
+        var request = delete("/api/tasks/" + task.getId()).with(user(user));
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
-        User opActual = repository.findById(user.getId()).orElse(null);
+        Task opActual = repository.findById(task.getId()).orElse(null);
 
         assertThat(opActual).isNull();
     }
 
     @Test
     public void testDeleteNoAuth() throws Exception {
-        var request = delete("/api/users/" + user.getId());
+        var request = delete("/api/tasks/" + task.getId());
         mockMvc.perform(request)
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void testDeleteForbidden() throws Exception {
-        var request = delete("/api/users/" + user.getId()).with(user(wrong));
+        var request = delete("/api/tasks/" + task.getId()).with(user(wrong));
         mockMvc.perform(request)
                 .andExpect(status().isForbidden());
     }

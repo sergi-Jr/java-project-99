@@ -1,15 +1,15 @@
 package hexlet.code.app.task.model;
 
+import hexlet.code.app.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -22,19 +22,18 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-public class TaskStatus {
+@ToString(onlyExplicitlyIncluded = true)
+public class TaskStatus implements BaseEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private long id;
 
-    @NotBlank
-    @Size(min = 1)
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
+    @ToString.Include
     private String name;
 
-    @NotBlank
-    @Size(min = 1)
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
+    @ToString.Include
     private String slug;
 
     @CreatedDate

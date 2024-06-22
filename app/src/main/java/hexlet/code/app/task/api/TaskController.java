@@ -1,13 +1,14 @@
 package hexlet.code.app.task.api;
 
-import hexlet.code.app.task.dto.TaskStatusCreateDTO;
-import hexlet.code.app.task.dto.TaskStatusDTO;
-import hexlet.code.app.task.dto.TaskStatusUpdateDTO;
-import hexlet.code.app.task.service.TaskStatusService;
+import hexlet.code.app.task.dto.TaskCreateDTO;
+import hexlet.code.app.task.dto.TaskDTO;
+import hexlet.code.app.task.dto.TaskUpdateDTO;
+import hexlet.code.app.task.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,39 +23,41 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/tasks")
 @EnableMethodSecurity
-@RequestMapping("/api/task_statuses")
-public class TaskStatusController {
+public class TaskController {
     @Autowired
-    private TaskStatusService statusService;
+    private TaskService taskService;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<TaskStatusDTO> index() {
-        return statusService.getAll();
+    public List<TaskDTO> index() {
+        return taskService.getAll();
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public TaskStatusDTO show(@PathVariable Long id) {
-        return statusService.getOneById(id);
+    public TaskDTO show(@PathVariable Long id) {
+        return taskService.getOneById(id);
     }
 
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public TaskStatusDTO create(@Valid @RequestBody TaskStatusCreateDTO data) {
-        return statusService.add(data);
+    public TaskDTO create(@Valid @RequestBody TaskCreateDTO data) {
+        return taskService.add(data);
     }
 
     @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public TaskStatusDTO update(@Valid @RequestBody TaskStatusUpdateDTO data, @PathVariable Long id) {
-        return statusService.update(id, data);
+    @PreAuthorize("@TaskService.getTaskUserId(#id) == authentication.principal.id")
+    public TaskDTO update(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO data) {
+        return taskService.update(id, data);
     }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("@TaskService.getTaskUserId(#id) == authentication.principal.id")
     public void delete(@PathVariable Long id) {
-        statusService.delete(id);
+        taskService.delete(id);
     }
 }

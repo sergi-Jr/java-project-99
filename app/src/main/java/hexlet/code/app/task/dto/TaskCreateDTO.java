@@ -19,5 +19,7 @@ public class TaskCreateDTO {
 
     private String status;
 
+    private String label;
+
     private JsonNullable<Long> assigneeId;
 }

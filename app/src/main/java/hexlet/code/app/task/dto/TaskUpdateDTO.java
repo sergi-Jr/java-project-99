@@ -19,5 +19,7 @@ public class TaskUpdateDTO {
 
     private JsonNullable<String> status;
 
+    private JsonNullable<String> label;
+
     private JsonNullable<Long> assigneeId;
 }

@@ -1,6 +1,7 @@
 package hexlet.code.app.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.app.label.LabelRepository;
 import hexlet.code.app.task.dto.TaskCreateDTO;
 import hexlet.code.app.task.mapper.TaskMapper;
 import hexlet.code.app.task.model.Task;
@@ -46,6 +47,9 @@ class TaskControllerTest {
     private ObjectMapper mapper;
 
     @Autowired
+    private LabelRepository labelRepository;
+
+    @Autowired
     private TaskRepository repository;
 
     @Autowired
@@ -83,6 +87,7 @@ class TaskControllerTest {
                 .ignore(Select.field(Task::getCreatedAt))
                 .ignore(Select.field(Task::getAssignee))
                 .ignore(Select.field(Task::getTaskStatus))
+                .ignore(Select.field(Task::getLabels))
                 .supply(Select.field(Task::getName), () -> faker.name().name())
                 .create();
 
@@ -101,6 +106,8 @@ class TaskControllerTest {
         task = generateTask();
         var ts = statusRepository.findBySlug("draft").get();
         task.setTaskStatus(ts);
+        var l = labelRepository.findByName("bug").get();
+        task.addLabel(l);
         repository.save(task);
     }
 

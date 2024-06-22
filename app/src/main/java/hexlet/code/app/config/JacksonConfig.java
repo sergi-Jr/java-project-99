@@ -18,7 +18,6 @@ public class JacksonConfig {
                 .modulesToInstall(new JsonNullableModule());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd");
         builder.serializers(new LocalDateSerializer(formatter));
-
         return builder;
     }
 }

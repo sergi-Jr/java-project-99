@@ -31,7 +31,6 @@ public class UserController {
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("isAuthenticated()")
     public List<UserDTO> index() {
         return userService.getAll();
     }

@@ -1,5 +1,6 @@
 package hexlet.code.app.task.model;
 
+import hexlet.code.app.label.Label;
 import hexlet.code.app.model.BaseEntity;
 import hexlet.code.app.user.User;
 import jakarta.persistence.Entity;
@@ -8,6 +9,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
@@ -21,6 +24,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -52,6 +57,22 @@ public class Task implements BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name = "assignee_id", referencedColumnName = "id")
     private User assignee;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "task_label",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "label_id")
+    )
+    private Set<Label> labels = new HashSet<>();
+
+    public void addLabel(Label label) {
+        labels.add(label);
+    }
+
+    public void removeLabel(Label label) {
+        labels.remove(label);
+    }
 
     @CreatedDate
     private LocalDate createdAt;

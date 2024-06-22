@@ -1,5 +1,7 @@
 package hexlet.code.app.component;
 
+import hexlet.code.app.label.Label;
+import hexlet.code.app.label.LabelRepository;
 import hexlet.code.app.task.model.TaskStatus;
 import hexlet.code.app.task.repository.TaskStatusRepository;
 import hexlet.code.app.user.User;
@@ -24,12 +26,16 @@ public class DataInitializer implements ApplicationRunner {
     private final TaskStatusRepository statusRepository;
 
     @Autowired
+    private final LabelRepository labelRepository;
+
+    @Autowired
     private final UserMapper mapper;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         initUser();
         initTaskStatuses(new String[]{"draft", "to_review", "to_be_fixed", "to_publish", "published"});
+        initLabels(new String[]{"feature", "bug"});
     }
 
     private void initUser() {
@@ -46,6 +52,14 @@ public class DataInitializer implements ApplicationRunner {
             status.setName(str);
             status.setSlug(str);
             statusRepository.save(status);
+        }
+    }
+
+    private void initLabels(String[] defaults) {
+        for (var l : defaults) {
+            var label = new Label();
+            label.setName(l);
+            labelRepository.save(label);
         }
     }
 }

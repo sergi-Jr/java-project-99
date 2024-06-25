@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,5 +16,5 @@ public class TaskDTO {
     private long assigneeId;
     private String content;
     private String status;
-    private String label;
+    private List<String> labelNames;
 }

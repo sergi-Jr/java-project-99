@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/login").permitAll()
                         .requestMatchers("/welcome").permitAll()
-                        .requestMatchers("/swagger**").permitAll()
+                        .requestMatchers("/swagger-ui-my.html").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(rs -> rs.jwt(j -> j.decoder(jwtDecoder)))

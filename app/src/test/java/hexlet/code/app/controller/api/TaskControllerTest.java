@@ -122,6 +122,19 @@ class TaskControllerTest {
     }
 
     @Test
+    void testIndexWithFilter() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/tasks")
+                        .with(user(user))
+                        .param("status", "draft")
+                        .param("labelId", String.valueOf(2L)))
+                .andExpect(status().isOk())
+                .andReturn();
+        String body = result.getResponse().getContentAsString();
+
+        assertThatJson(body).isArray().hasSize(1);
+    }
+
+    @Test
     public void testIndexNoAuth() throws Exception {
         mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isUnauthorized());

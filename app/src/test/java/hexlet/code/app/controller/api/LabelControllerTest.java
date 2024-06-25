@@ -2,7 +2,7 @@ package hexlet.code.app.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.app.label.Label;
-import hexlet.code.app.label.LabelMapper;
+import hexlet.code.app.label.mapper.LabelMapper;
 import hexlet.code.app.label.LabelRepository;
 import hexlet.code.app.label.dto.LabelCreateDTO;
 import hexlet.code.app.task.repository.TaskRepository;

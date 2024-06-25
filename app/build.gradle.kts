@@ -74,7 +74,7 @@ tasks.jacocoTestReport {
 
 sentry {
     includeSourceContext = true
-    projectName = "task-manager"
-    org = "hexlet.edu"
+    projectName = "java-spring-boot"
+    org = "slavica"
     authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }

@@ -19,6 +19,6 @@ public class UserCreateDTO {
     private JsonNullable<String> lastName;
 
     @NotBlank
-    @Size(min = 3)
+    @Size(min = 3, max = 100)
     private String password;
 }

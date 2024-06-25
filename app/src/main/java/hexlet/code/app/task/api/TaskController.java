@@ -2,6 +2,7 @@ package hexlet.code.app.task.api;
 
 import hexlet.code.app.task.dto.TaskCreateDTO;
 import hexlet.code.app.task.dto.TaskDTO;
+import hexlet.code.app.task.dto.TaskParamsDTO;
 import hexlet.code.app.task.dto.TaskUpdateDTO;
 import hexlet.code.app.task.service.TaskService;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,8 +33,8 @@ public class TaskController {
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<TaskDTO> index() {
-        return taskService.getAll();
+    public List<TaskDTO> index(TaskParamsDTO params, @RequestParam(defaultValue = "1") int page) {
+        return taskService.getAll(params, page);
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

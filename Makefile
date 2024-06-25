@@ -1,38 +1,33 @@
-.DEFAULT_GOAL := build-run
-
 setup:
-	gradle wrapper --gradle-version 8.7
+	npm install
+	./gradlew wrapper --gradle-version 8.7
+	./gradlew build
 
 clean:
-	app/gradlew -p app clean
+	./gradlew clean
 
 build:
-	app/gradlew -p app clean build
+	./gradlew clean build
+
+reload-classes:
+	./gradlew -t classes
 
 install:
-	app/gradlew -p app clean install
-
-run-dist:
-	app/build/install/app/bin/app
-
-run:
-	app/gradlew -p app run
-
-test:
-	app/gradlew -p app test
-
-report:
-	app/gradlew -p app jacocoTestReport
+	./gradlew installDist
 
 lint:
-	app/gradlew -p app checkstyleMain
+	./gradlew checkstyleMain checkstyleTest
 
-lint-test:
-	app/gradlew -p app checkstyleTest
+test:
+	./gradlew test
 
-check-deps:
-	app/gradlew -p app dependencyUpdates -Drevision=release
+report:
+	./gradlew jacocoTestReport
 
-build-run: app/build run
+update-js-deps:
+	npx ncu -u
+
+check-java-deps:
+	./gradlew dependencyUpdates -Drevision=release
 
 .PHONY: build

@@ -5,6 +5,7 @@ import hexlet.code.app.exception.UnableDeletionException;
 import hexlet.code.app.label.dto.LabelCreateDTO;
 import hexlet.code.app.label.dto.LabelDTO;
 import hexlet.code.app.label.dto.LabelUpdateDTO;
+import hexlet.code.app.label.mapper.LabelMapper;
 import hexlet.code.app.task.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

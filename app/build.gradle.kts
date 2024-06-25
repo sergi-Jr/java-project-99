@@ -9,6 +9,7 @@ plugins {
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
     id("io.freefair.lombok") version "8.6"
+    id("io.sentry.jvm.gradle") version "4.8.0"
 }
 
 group = "hexlet.code"
@@ -69,4 +70,10 @@ tasks.jacocoTestReport {
     reports {
         xml.required = true
     }
+}
+
+sentry {
+    includeSourceContext = true
+    projectName = "task-manager"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }

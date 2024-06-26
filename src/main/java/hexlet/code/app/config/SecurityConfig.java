@@ -15,7 +15,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Component
 @EnableWebSecurity
@@ -30,13 +32,19 @@ public class SecurityConfig {
     private SimpleUserDetailsService detailsService;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
+        return new MvcRequestMatcher.Builder(introspector);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/").permitAll()
-                        .requestMatchers("/api/login").permitAll()
-                        .requestMatchers("/welcome").permitAll()
-                        .requestMatchers("/swagger-ui-my.html").permitAll()
+                        .requestMatchers(mvc.pattern("/"), mvc.pattern("/index.html")).permitAll()
+                        .requestMatchers(mvc.pattern("/assets/**")).permitAll()
+                        .requestMatchers(mvc.pattern("/api/login")).permitAll()
+                        .requestMatchers(mvc.pattern("/welcome")).permitAll()
+                        .requestMatchers(mvc.pattern("/swagger-ui-my.html"), mvc.pattern("/swagger-ui/**")).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(rs -> rs.jwt(j -> j.decoder(jwtDecoder)))

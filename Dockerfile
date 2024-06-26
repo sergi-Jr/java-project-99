@@ -1,6 +1,6 @@
-FROM eclipseFROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jdk
 
-WORKDIR /java-project-99
+WORKDIR /app
 
 COPY gradle gradle
 COPY build.gradle.kts .

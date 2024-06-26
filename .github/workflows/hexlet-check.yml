@@ -17,9 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Hexlet project check
         uses: hexlet/project-action@release
         with:
-          build-root-directory: app
           hexlet-id: ${{ secrets.HEXLET_ID }}

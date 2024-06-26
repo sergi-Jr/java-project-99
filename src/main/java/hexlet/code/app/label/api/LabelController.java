@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,9 +30,11 @@ public class LabelController {
     private LabelService labelService;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.OK)
-    public List<LabelDTO> index() {
-        return labelService.getAll();
+    public ResponseEntity<List<LabelDTO>> index() {
+        List<LabelDTO> resBody = labelService.getAll();
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(resBody.size()))
+                .body(resBody);
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,9 +30,11 @@ public class TaskStatusController {
     private TaskStatusService statusService;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.OK)
-    public List<TaskStatusDTO> index() {
-        return statusService.getAll();
+    public ResponseEntity<List<TaskStatusDTO>> index() {
+        List<TaskStatusDTO> resBody =  statusService.getAll();
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(resBody.size()))
+                .body(resBody);
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

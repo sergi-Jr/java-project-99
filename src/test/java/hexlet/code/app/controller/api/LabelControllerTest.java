@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -24,6 +25,7 @@ import java.util.Optional;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -58,16 +60,16 @@ public class LabelControllerTest {
     @Autowired
     private TaskStatusRepository statusRepository;
 
-    private User wrong;
-
     private User user;
 
     private Label label;
 
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
     @BeforeEach
     void setup() {
         user = userRepository.findByEmail("hexlet@example.com").get();
+        token = jwt().jwt(b -> b.subject(user.getEmail()));
         label = new Label();
         label.setName(faker.internet().username());
         labelRepository.save(label);
@@ -75,7 +77,7 @@ public class LabelControllerTest {
 
     @Test
     public void testIndexWithAuth() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/labels").with(user(user)))
+        MvcResult result = mockMvc.perform(get("/api/labels").with(token))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -91,7 +93,7 @@ public class LabelControllerTest {
 
     @Test
     public void testShow() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/labels/" + label.getId()).with(user(user)))
+        MvcResult result = mockMvc.perform(get("/api/labels/" + label.getId()).with(token))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -112,7 +114,7 @@ public class LabelControllerTest {
         var l = new LabelCreateDTO();
         l.setName("testName");
 
-        var request = post("/api/labels").with(user(user))
+        var request = post("/api/labels").with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(labelMapper.map(l)));
         mockMvc.perform(request)
@@ -140,7 +142,7 @@ public class LabelControllerTest {
     public void testUpdate() throws Exception {
         Map<String, String> data = Map.of("name", "new");
 
-        var request = put("/api/labels/" + label.getId()).with(user(user))
+        var request = put("/api/labels/" + label.getId()).with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(data));
         mockMvc.perform(request)
@@ -165,7 +167,7 @@ public class LabelControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-        var request = delete("/api/labels/" + label.getId()).with(user(user));
+        var request = delete("/api/labels/" + label.getId()).with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
         Label opActual = labelRepository.findById(label.getId()).orElse(null);

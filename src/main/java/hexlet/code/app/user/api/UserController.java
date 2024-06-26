@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,9 +31,11 @@ public class UserController {
     private UserService userService;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.OK)
-    public List<UserDTO> index() {
-        return userService.getAll();
+    public ResponseEntity<List<UserDTO>> index() {
+        List<UserDTO> resBody = userService.getAll();
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(resBody.size()))
+                .body(resBody);
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,14 +52,14 @@ public class UserController {
 
     @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("authentication.principal.id == #id")
+    @PreAuthorize("@UserService.getIdByEmail(authentication.name) == #id")
     public UserDTO update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO data) {
         return userService.update(id, data);
     }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("authentication.principal.id == #id")
+    @PreAuthorize("@UserService.getIdByEmail(authentication.name) == #id")
     public void delete(@PathVariable Long id) {
         userService.delete(id);
     }

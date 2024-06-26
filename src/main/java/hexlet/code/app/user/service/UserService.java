@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
+@Service("UserService")
 @Transactional(readOnly = true)
 public class UserService {
     @Autowired
@@ -64,5 +64,11 @@ public class UserService {
             throw new UnableDeletionException("User has active tasks");
         }
         repository.deleteById(id);
+    }
+
+    public Long getIdByEmail(String email) {
+        return repository.getReferenceByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found"))
+                .getId();
     }
 }

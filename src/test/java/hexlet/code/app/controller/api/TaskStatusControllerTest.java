@@ -16,12 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Map;
 import java.util.Optional;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,7 +60,10 @@ class TaskStatusControllerTest {
     private final String defaultEmail = "hexlet@example.com";
 
     private User user;
+
     private TaskStatus status;
+
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
     @BeforeEach
     void setup() {
@@ -67,12 +72,13 @@ class TaskStatusControllerTest {
         status.setName(faker.internet().username());
         statusRepository.save(status);
         user = userRepository.findByEmail(defaultEmail).get();
+        token = jwt().jwt(b -> b.subject(user.getEmail()));
         status = statusRepository.findBySlug(status.getSlug()).get();
     }
 
     @Test
     public void testIndexWithAuth() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/task_statuses").with(user(user)))
+        MvcResult result = mockMvc.perform(get("/api/task_statuses").with(token))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -88,7 +94,7 @@ class TaskStatusControllerTest {
 
     @Test
     public void testShow() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/task_statuses/" + status.getId()).with(user(user)))
+        MvcResult result = mockMvc.perform(get("/api/task_statuses/" + status.getId()).with(token))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -111,7 +117,7 @@ class TaskStatusControllerTest {
         dto.setName("test");
         dto.setSlug("test");
 
-        var request = post("/api/task_statuses").with(user(user))
+        var request = post("/api/task_statuses").with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(dto));
         mockMvc.perform(request)
@@ -142,7 +148,7 @@ class TaskStatusControllerTest {
     public void testUpdate() throws Exception {
         Map<String, String> data = Map.of("name", "newStatusName");
 
-        var request = put("/api/task_statuses/" + status.getId()).with(user(user))
+        var request = put("/api/task_statuses/" + status.getId()).with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(data));
         mockMvc.perform(request)
@@ -167,7 +173,7 @@ class TaskStatusControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-        var request = delete("/api/task_statuses/" + status.getId()).with(user(user));
+        var request = delete("/api/task_statuses/" + status.getId()).with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
         TaskStatus opActual = statusRepository.findById(status.getId()).orElse(null);
@@ -189,7 +195,7 @@ class TaskStatusControllerTest {
         task.setName("testName");
         taskRepository.save(task);
 
-        var request = delete("/api/task_statuses/" + status.getId()).with(user(user));
+        var request = delete("/api/task_statuses/" + status.getId()).with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNotAcceptable());
     }

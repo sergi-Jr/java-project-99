@@ -15,12 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Map;
 import java.util.Optional;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,9 +53,13 @@ class UserControllerTest {
     @Autowired
     private UserMapper userMapper;
 
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
+
     private User wrong;
 
     private User user;
+
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor wrongToken;
 
     private User generateUser() {
         User generatedUser = Instancio.of(User.class)
@@ -73,6 +79,8 @@ class UserControllerTest {
     void setup() {
         wrong = generateUser();
         user = generateUser();
+        token = jwt().jwt(builder -> builder.subject(user.getEmail()));
+        wrongToken = jwt().jwt(b -> b.subject(wrong.getEmail()));
         repository.save(user);
         repository.save(wrong);
     }
@@ -100,7 +108,7 @@ class UserControllerTest {
 
     @Test
     public void testShow() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/users/" + user.getId()).with(user(user)))
+        MvcResult result = mockMvc.perform(get("/api/users/" + user.getId()).with(token))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -122,7 +130,7 @@ class UserControllerTest {
     void testCreate() throws Exception {
         User user1 = generateUser();
 
-        var request = post("/api/users").with(user(user))
+        var request = post("/api/users").with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(userMapper.mapToCreateDTO(user1)));
         mockMvc.perform(request)
@@ -151,7 +159,7 @@ class UserControllerTest {
     public void testUpdate() throws Exception {
         Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
 
-        var request = put("/api/users/" + user.getId()).with(user(user))
+        var request = put("/api/users/" + user.getId()).with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(data));
         mockMvc.perform(request)
@@ -180,7 +188,7 @@ class UserControllerTest {
     public void testUpdateForbidden() throws Exception {
         Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
 
-        var request = put("/api/users/" + user.getId()).with(user(wrong))
+        var request = put("/api/users/" + user.getId()).with(wrongToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(data));
         mockMvc.perform(request)
@@ -189,7 +197,7 @@ class UserControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-        var request = delete("/api/users/" + user.getId()).with(user(user));
+        var request = delete("/api/users/" + user.getId()).with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
         User opActual = repository.findById(user.getId()).orElse(null);
@@ -206,7 +214,7 @@ class UserControllerTest {
 
     @Test
     public void testDeleteForbidden() throws Exception {
-        var request = delete("/api/users/" + user.getId()).with(user(wrong));
+        var request = delete("/api/users/" + user.getId()).with(wrongToken);
         mockMvc.perform(request)
                 .andExpect(status().isForbidden());
     }
@@ -219,7 +227,7 @@ class UserControllerTest {
         user.addTask(task);
         repository.save(user);
 
-        var request = delete("/api/users/" + user.getId()).with(user(user));
+        var request = delete("/api/users/" + user.getId()).with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNotAcceptable());
     }

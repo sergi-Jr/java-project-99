@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,8 +33,11 @@ public class TaskController {
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<TaskDTO> index(TaskParamsDTO params, @RequestParam(defaultValue = "1") int page) {
-        return taskService.getAll(params, page);
+    public ResponseEntity<List<TaskDTO>> index(TaskParamsDTO params, @RequestParam(defaultValue = "1") int page) {
+        List<TaskDTO> resBody = taskService.getAll(params, page);
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(resBody.size()))
+                .body(resBody);
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -51,14 +54,16 @@ public class TaskController {
 
     @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@TaskService.getTaskUserId(#id) == authentication.principal.id")
+    //TODO uncomment the code below when task ownership logic is required
+    //@PreAuthorize("@TaskService.getTaskUserId(#id) == @UserService.getIdByEmail(authentication.name)")
     public TaskDTO update(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO data) {
         return taskService.update(id, data);
     }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("@TaskService.getTaskUserId(#id) == authentication.principal.id")
+    //TODO uncomment the code below when task ownership logic is required
+    //@PreAuthorize("@TaskService.getTaskUserId(#id) == @UserService.getIdByEmail(authentication.name)")
     public void delete(@PathVariable Long id) {
         taskService.delete(id);
     }

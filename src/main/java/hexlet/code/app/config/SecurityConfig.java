@@ -43,7 +43,6 @@ public class SecurityConfig {
                         .requestMatchers(mvc.pattern("/"), mvc.pattern("/index.html")).permitAll()
                         .requestMatchers(mvc.pattern("/assets/**")).permitAll()
                         .requestMatchers(mvc.pattern("/api/login")).permitAll()
-                        .requestMatchers(mvc.pattern("/welcome")).permitAll()
                         .requestMatchers(mvc.pattern("/swagger-ui-my.html"), mvc.pattern("/swagger-ui/**")).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

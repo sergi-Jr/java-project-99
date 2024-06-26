@@ -19,12 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Map;
 import java.util.Optional;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,6 +69,10 @@ class TaskControllerTest {
 
     private Task task;
 
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
+
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor wrongToken;
+
     private User generateUser() {
         User generatedUser = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
@@ -100,6 +106,9 @@ class TaskControllerTest {
 
         wrong = generateUser();
         user = generateUser();
+        token = jwt().jwt(b -> b.subject(user.getEmail()));
+        wrongToken = jwt().jwt(b -> b.subject(wrong.getEmail()));
+
         userRepository.save(user);
         userRepository.save(wrong);
 
@@ -113,7 +122,7 @@ class TaskControllerTest {
 
     @Test
     public void testIndexWithAuth() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/tasks").with(user(user)))
+        MvcResult result = mockMvc.perform(get("/api/tasks").with(token))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -124,7 +133,7 @@ class TaskControllerTest {
     @Test
     void testIndexWithFilter() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/tasks")
-                        .with(user(user))
+                        .with(token)
                         .param("status", "draft")
                         .param("labelId", String.valueOf(2L)))
                 .andExpect(status().isOk())
@@ -142,7 +151,7 @@ class TaskControllerTest {
 
     @Test
     public void testShow() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/tasks/" + task.getId()).with(user(user)))
+        MvcResult result = mockMvc.perform(get("/api/tasks/" + task.getId()).with(token))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -166,7 +175,7 @@ class TaskControllerTest {
         dto.setStatus("testStatus");
         dto.setAssigneeId(JsonNullable.of(user.getId()));
 
-        var request = post("/api/tasks").with(user(user))
+        var request = post("/api/tasks").with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(dto));
         mockMvc.perform(request)
@@ -192,7 +201,7 @@ class TaskControllerTest {
         user.addTask(task);
         userRepository.save(user);
 
-        var request = put("/api/tasks/" + task.getId()).with(user(user))
+        var request = put("/api/tasks/" + task.getId()).with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(data));
         mockMvc.perform(request)
@@ -216,23 +225,24 @@ class TaskControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    @Test
-    public void testUpdateForbidden() throws Exception {
-        Map<String, String> data = Map.of("index", "100", "name", "newName");
-
-        var request = put("/api/tasks/" + task.getId()).with(user(wrong))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(data));
-        mockMvc.perform(request)
-                .andExpect(status().isForbidden());
-    }
+    //TODO uncomment the code below when task ownership logic is required
+//    @Test
+//    public void testUpdateForbidden() throws Exception {
+//        Map<String, String> data = Map.of("index", "100", "name", "newName");
+//
+//        var request = put("/api/tasks/" + task.getId()).with(wrongToken)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(mapper.writeValueAsString(data));
+//        mockMvc.perform(request)
+//                .andExpect(status().isForbidden());
+//    }
 
     @Test
     public void testDelete() throws Exception {
         user.addTask(task);
         userRepository.save(user);
 
-        var request = delete("/api/tasks/" + task.getId()).with(user(user));
+        var request = delete("/api/tasks/" + task.getId()).with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
         Task opActual = repository.findById(task.getId()).orElse(null);
@@ -246,11 +256,11 @@ class TaskControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isUnauthorized());
     }
-
-    @Test
-    public void testDeleteForbidden() throws Exception {
-        var request = delete("/api/tasks/" + task.getId()).with(user(wrong));
-        mockMvc.perform(request)
-                .andExpect(status().isForbidden());
-    }
+//TODO uncomment the code below when task ownership logic is required
+//    @Test
+//    public void testDeleteForbidden() throws Exception {
+//        var request = delete("/api/tasks/" + task.getId()).with(wrongToken);
+//        mockMvc.perform(request)
+//                .andExpect(status().isForbidden());
+//    }
 }

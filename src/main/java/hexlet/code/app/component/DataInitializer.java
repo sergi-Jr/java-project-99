@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-@Profile("development")
 public class DataInitializer implements ApplicationRunner {
     @Autowired
     private final UserRepository userRepository;

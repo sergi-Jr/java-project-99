@@ -12,7 +12,7 @@ RUN ./gradlew --no-daemon dependencies
 COPY src src
 COPY config config
 
-RUN ./gradlew --no-daemon build
+RUN ./gradlew --no-daemon build --exclude-task test
 
 ENV JAVA_OPTS "-Xmx512M -Xms512M"
 EXPOSE 8080

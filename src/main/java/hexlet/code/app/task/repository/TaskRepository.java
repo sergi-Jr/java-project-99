@@ -13,10 +13,11 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
     List<Task> findAllByTaskStatus(TaskStatus status);
 
-    @Query("""
-            select t from Task t
-            join Label l on
-            l.name like :label
-            """)
-    List<Task> findAllByLabel(String label);
+    @Query(value = """
+            select * from Tasks t
+            inner join TASK_LABELS tl on
+            tl.label_id = ?1
+            where tl.task_id = t.id
+            """, nativeQuery = true)
+    List<Task> findAllByLabel(Long labelId);
 }

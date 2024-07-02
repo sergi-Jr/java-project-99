@@ -52,8 +52,8 @@ public class LabelService {
 
     @Transactional
     public void delete(Long id) {
-        String label = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Not found")).getName();
-        if (!taskRepository.findAllByLabel(label).isEmpty()) {
+        Long labelId = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Not found")).getId();
+        if (!taskRepository.findAllByLabel(labelId).isEmpty()) {
             throw new UnableDeletionException("Label has active tasks");
         }
         repository.deleteById(id);

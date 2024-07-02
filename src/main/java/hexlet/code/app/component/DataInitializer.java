@@ -3,6 +3,7 @@ package hexlet.code.app.component;
 import hexlet.code.app.label.Label;
 import hexlet.code.app.label.LabelRepository;
 import hexlet.code.app.task.model.TaskStatus;
+import hexlet.code.app.task.repository.TaskRepository;
 import hexlet.code.app.task.repository.TaskStatusRepository;
 import hexlet.code.app.user.User;
 import hexlet.code.app.user.dto.UserCreateDTO;
@@ -27,10 +28,14 @@ public class DataInitializer implements ApplicationRunner {
     private final LabelRepository labelRepository;
 
     @Autowired
+    private final TaskRepository taskRepository;
+
+    @Autowired
     private final UserMapper mapper;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        dbCleanup();
         initUser();
         initTaskStatuses(new String[]{"draft", "to_review", "to_be_fixed", "to_publish", "published"});
         initLabels(new String[]{"feature", "bug"});
@@ -59,5 +64,12 @@ public class DataInitializer implements ApplicationRunner {
             label.setName(l);
             labelRepository.save(label);
         }
+    }
+
+    private void dbCleanup() {
+        labelRepository.deleteAll();
+        statusRepository.deleteAll();
+        taskRepository.deleteAll();
+        userRepository.deleteAll();
     }
 }

@@ -10,6 +10,7 @@ import net.datafaker.Faker;
 import org.instancio.Instancio;
 import org.instancio.Select;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -86,6 +87,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(1)
     public void testIndexWithAuth() throws Exception {
         User user1 = generateUser();
         User user2 = generateUser();
@@ -101,12 +103,14 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(2)
     public void testIndexNoAuth() throws Exception {
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(3)
     public void testShow() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/users/" + user.getId()).with(token))
                 .andExpect(status().isOk())
@@ -121,12 +125,14 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(4)
     public void testShowNoAuth() throws Exception {
         mockMvc.perform(get("/api/users/" + user.getId()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(5)
     void testCreate() throws Exception {
         User user1 = generateUser();
 
@@ -145,6 +151,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(6)
     void testCreateNoAuth() throws Exception {
         User user1 = generateUser();
 
@@ -156,6 +163,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(7)
     public void testUpdate() throws Exception {
         Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
 
@@ -174,6 +182,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(8)
     public void testUpdateNoAuth() throws Exception {
         Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
 
@@ -185,6 +194,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(9)
     public void testUpdateForbidden() throws Exception {
         Map<String, String> data = Map.of("email", "trueTest@gmail.com", "firstName", "John");
 
@@ -196,6 +206,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(10)
     public void testDelete() throws Exception {
         var request = delete("/api/users/" + user.getId()).with(token);
         mockMvc.perform(request)
@@ -206,6 +217,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(11)
     public void testDeleteNoAuth() throws Exception {
         var request = delete("/api/users/" + user.getId());
         mockMvc.perform(request)
@@ -213,6 +225,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(12)
     public void testDeleteForbidden() throws Exception {
         var request = delete("/api/users/" + user.getId()).with(wrongToken);
         mockMvc.perform(request)
@@ -220,6 +233,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(13)
     void testDeleteUserHasTask() throws Exception {
         var task = new Task();
         task.setTaskStatus(statusRepository.findBySlug("published").get());

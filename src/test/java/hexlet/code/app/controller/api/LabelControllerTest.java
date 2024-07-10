@@ -11,6 +11,7 @@ import hexlet.code.app.user.User;
 import hexlet.code.app.user.UserRepository;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -76,6 +77,7 @@ public class LabelControllerTest {
     }
 
     @Test
+    @Order(1)
     public void testIndexWithAuth() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/labels").with(token))
                 .andExpect(status().isOk())
@@ -86,12 +88,14 @@ public class LabelControllerTest {
     }
 
     @Test
+    @Order(2)
     public void testIndexNoAuth() throws Exception {
         mockMvc.perform(get("/api/labels"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(3)
     public void testShow() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/labels/" + label.getId()).with(token))
                 .andExpect(status().isOk())
@@ -104,12 +108,14 @@ public class LabelControllerTest {
     }
 
     @Test
+    @Order(4)
     public void testShowNoAuth() throws Exception {
         mockMvc.perform(get("/api/labels/" + user.getId()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(5)
     void testCreate() throws Exception {
         var l = new LabelCreateDTO();
         l.setName("testName");
@@ -127,6 +133,7 @@ public class LabelControllerTest {
     }
 
     @Test
+    @Order(6)
     void testCreateNoAuth() throws Exception {
         var l = new LabelCreateDTO();
         l.setName("testName");
@@ -139,6 +146,7 @@ public class LabelControllerTest {
     }
 
     @Test
+    @Order(7)
     public void testUpdate() throws Exception {
         Map<String, String> data = Map.of("name", "new");
 
@@ -155,6 +163,7 @@ public class LabelControllerTest {
     }
 
     @Test
+    @Order(8)
     public void testUpdateNoAuth() throws Exception {
         Map<String, String> data = Map.of("name", "new");
 
@@ -166,6 +175,7 @@ public class LabelControllerTest {
     }
 
     @Test
+    @Order(9)
     public void testDelete() throws Exception {
         var request = delete("/api/labels/" + label.getId()).with(token);
         mockMvc.perform(request)
@@ -176,6 +186,7 @@ public class LabelControllerTest {
     }
 
     @Test
+    @Order(10)
     public void testDeleteNoAuth() throws Exception {
         var request = delete("/api/labels/" + label.getId());
         mockMvc.perform(request)

@@ -11,6 +11,7 @@ import hexlet.code.app.user.User;
 import hexlet.code.app.user.UserRepository;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -77,6 +78,7 @@ class TaskStatusControllerTest {
     }
 
     @Test
+    @Order(1)
     public void testIndexWithAuth() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/task_statuses").with(token))
                 .andExpect(status().isOk())
@@ -87,12 +89,14 @@ class TaskStatusControllerTest {
     }
 
     @Test
+    @Order(2)
     public void testIndexNoAuth() throws Exception {
         mockMvc.perform(get("/api/task_statuses"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(3)
     public void testShow() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/task_statuses/" + status.getId()).with(token))
                 .andExpect(status().isOk())
@@ -106,12 +110,14 @@ class TaskStatusControllerTest {
     }
 
     @Test
+    @Order(4)
     public void testShowNoAuth() throws Exception {
         mockMvc.perform(get("/api/task_statuses/" + status.getId()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(5)
     void testCreate() throws Exception {
         TaskStatusCreateDTO dto = new TaskStatusCreateDTO();
         dto.setName("test");
@@ -132,6 +138,7 @@ class TaskStatusControllerTest {
 
 
     @Test
+    @Order(6)
     void testCreateNoAuth() throws Exception {
         TaskStatusCreateDTO dto = new TaskStatusCreateDTO();
         dto.setName("test");
@@ -145,6 +152,7 @@ class TaskStatusControllerTest {
     }
 
     @Test
+    @Order(7)
     public void testUpdate() throws Exception {
         Map<String, String> data = Map.of("name", "newStatusName");
 
@@ -161,6 +169,7 @@ class TaskStatusControllerTest {
     }
 
     @Test
+    @Order(8)
     public void testUpdateNoAuth() throws Exception {
         Map<String, String> data = Map.of("name", "newStatusName");
 
@@ -172,6 +181,7 @@ class TaskStatusControllerTest {
     }
 
     @Test
+    @Order(9)
     public void testDelete() throws Exception {
         var request = delete("/api/task_statuses/" + status.getId()).with(token);
         mockMvc.perform(request)
@@ -182,6 +192,7 @@ class TaskStatusControllerTest {
     }
 
     @Test
+    @Order(10)
     public void testDeleteNoAuth() throws Exception {
         var request = delete("/api/task_statuses/" + status.getId());
         mockMvc.perform(request)
@@ -189,6 +200,7 @@ class TaskStatusControllerTest {
     }
 
     @Test
+    @Order(11)
     void testDeleteHasTask() throws Exception {
         var task = new Task();
         task.setTaskStatus(status);

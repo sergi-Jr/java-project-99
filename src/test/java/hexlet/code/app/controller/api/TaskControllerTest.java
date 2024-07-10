@@ -1,6 +1,7 @@
 package hexlet.code.app.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.app.label.Label;
 import hexlet.code.app.label.LabelRepository;
 import hexlet.code.app.task.dto.TaskCreateDTO;
 import hexlet.code.app.task.mapper.TaskMapper;
@@ -13,6 +14,7 @@ import net.datafaker.Faker;
 import org.instancio.Instancio;
 import org.instancio.Select;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +71,8 @@ class TaskControllerTest {
 
     private Task task;
 
+    private Label label;
+
     private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
     private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor wrongToken;
@@ -115,12 +119,17 @@ class TaskControllerTest {
         task = generateTask();
         var ts = statusRepository.findBySlug("draft").get();
         task.setTaskStatus(ts);
-        var l = labelRepository.findByName("bug").get();
-        task.addLabel(l);
+
+        label = new Label();
+        label.setName(faker.greekPhilosopher().name());
+        labelRepository.save(label);
+        task.addLabel(label);
+
         repository.save(task);
     }
 
     @Test
+    @Order(1)
     public void testIndexWithAuth() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/tasks").with(token))
                 .andExpect(status().isOk())
@@ -131,11 +140,12 @@ class TaskControllerTest {
     }
 
     @Test
+    @Order(2)
     void testIndexWithFilter() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/tasks")
                         .with(token)
                         .param("status", "draft")
-                        .param("labelId", String.valueOf(2L)))
+                        .param("labelId", String.valueOf(label.getId())))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -144,12 +154,14 @@ class TaskControllerTest {
     }
 
     @Test
+    @Order(3)
     public void testIndexNoAuth() throws Exception {
         mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(4)
     public void testShow() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/tasks/" + task.getId()).with(token))
                 .andExpect(status().isOk())
@@ -163,12 +175,14 @@ class TaskControllerTest {
     }
 
     @Test
+    @Order(5)
     public void testShowNoAuth() throws Exception {
         mockMvc.perform(get("/api/tasks/" + task.getId()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(6)
     void testCreate() throws Exception {
         TaskCreateDTO dto = new TaskCreateDTO();
         dto.setTitle("title");
@@ -183,6 +197,7 @@ class TaskControllerTest {
     }
 
     @Test
+    @Order(7)
     void testCreateNoAuth() throws Exception {
         TaskCreateDTO dto = new TaskCreateDTO();
         dto.setTitle("title");
@@ -196,6 +211,7 @@ class TaskControllerTest {
     }
 
     @Test
+    @Order(8)
     public void testUpdate() throws Exception {
         Map<String, String> data = Map.of("index", "100", "title", "newName");
         user.addTask(task);
@@ -215,6 +231,7 @@ class TaskControllerTest {
     }
 
     @Test
+    @Order(9)
     public void testUpdateNoAuth() throws Exception {
         Map<String, String> data = Map.of("index", "100", "name", "newName");
 
@@ -227,6 +244,7 @@ class TaskControllerTest {
 
     //TODO uncomment the code below when task ownership logic is required
 //    @Test
+//    @Order(10)
 //    public void testUpdateForbidden() throws Exception {
 //        Map<String, String> data = Map.of("index", "100", "name", "newName");
 //
@@ -238,7 +256,9 @@ class TaskControllerTest {
 //    }
 
     @Test
-    public void testDelete() throws Exception {
+    @Order(11)
+    public void testDelete()
+            throws Exception {
         user.addTask(task);
         userRepository.save(user);
 
@@ -251,6 +271,7 @@ class TaskControllerTest {
     }
 
     @Test
+    @Order(12)
     public void testDeleteNoAuth() throws Exception {
         var request = delete("/api/tasks/" + task.getId());
         mockMvc.perform(request)
@@ -258,6 +279,7 @@ class TaskControllerTest {
     }
 //TODO uncomment the code below when task ownership logic is required
 //    @Test
+//    @Order(13)
 //    public void testDeleteForbidden() throws Exception {
 //        var request = delete("/api/tasks/" + task.getId()).with(wrongToken);
 //        mockMvc.perform(request)

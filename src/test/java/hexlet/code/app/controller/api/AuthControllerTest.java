@@ -3,6 +3,7 @@ package hexlet.code.app.controller.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.app.authentication.model.AuthRequest;
 import hexlet.code.app.user.UserRepository;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,6 +35,7 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Order(1)
     public void testLoginSuccess() throws Exception {
         AuthRequest requestBody = generateAuthRequest("hexlet@example.com", "qwerty");
 
@@ -49,6 +51,7 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Order(2)
     public void testLoginFailure() throws Exception {
         AuthRequest requestBody = generateAuthRequest("wrongEmail@gmail.com", "password");
 

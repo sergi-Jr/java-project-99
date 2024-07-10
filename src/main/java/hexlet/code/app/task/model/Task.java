@@ -3,6 +3,7 @@ package hexlet.code.app.task.model;
 import hexlet.code.app.label.Label;
 import hexlet.code.app.model.BaseEntity;
 import hexlet.code.app.user.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -57,7 +58,7 @@ public class Task implements BaseEntity {
     @PrimaryKeyJoinColumn(name = "assignee_id", referencedColumnName = "id")
     private User assignee;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(
             name = "task_labels",
             joinColumns = @JoinColumn(name = "task_id"),

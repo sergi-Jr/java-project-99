@@ -121,7 +121,7 @@ class TaskControllerTest {
         task.setTaskStatus(ts);
 
         label = new Label();
-        label.setName(faker.greekPhilosopher().name());
+        label.setName(faker.lorem().word() + faker.number().randomNumber());
         labelRepository.save(label);
         task.addLabel(label);
 

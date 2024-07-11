@@ -67,9 +67,9 @@ public class DataInitializer implements ApplicationRunner {
     }
 
     private void dbCleanup() {
-        labelRepository.deleteAll();
-        statusRepository.deleteAll();
         taskRepository.deleteAll();
         userRepository.deleteAll();
+        labelRepository.deleteAll();
+        statusRepository.deleteAll();
     }
 }

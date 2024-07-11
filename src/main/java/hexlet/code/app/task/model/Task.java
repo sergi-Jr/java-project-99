@@ -54,11 +54,11 @@ public class Task implements BaseEntity {
     @ToString.Include
     private TaskStatus taskStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @PrimaryKeyJoinColumn(name = "assignee_id", referencedColumnName = "id")
     private User assignee;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "task_labels",
             joinColumns = @JoinColumn(name = "task_id"),

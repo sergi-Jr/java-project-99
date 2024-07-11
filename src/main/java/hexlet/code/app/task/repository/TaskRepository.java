@@ -14,10 +14,8 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     List<Task> findAllByTaskStatus(TaskStatus status);
 
     @Query(value = """
-            select * from Tasks t
-            inner join TASK_LABELS tl on
-            tl.label_id = ?1
-            where tl.task_id = t.id
+            select * from tasks
+            where tasks.assignee_id = ?1
             """, nativeQuery = true)
-    List<Task> findAllByLabel(Long labelId);
+    List<Task> findAllByUserId(Long userId);
 }

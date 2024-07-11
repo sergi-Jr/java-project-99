@@ -1,7 +1,6 @@
 package hexlet.code.app.label;
 
 import hexlet.code.app.exception.ResourceNotFoundException;
-import hexlet.code.app.exception.UnableDeletionException;
 import hexlet.code.app.label.dto.LabelCreateDTO;
 import hexlet.code.app.label.dto.LabelDTO;
 import hexlet.code.app.label.dto.LabelUpdateDTO;
@@ -52,10 +51,6 @@ public class LabelService {
 
     @Transactional
     public void delete(Long id) {
-        Long labelId = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Not found")).getId();
-        if (!taskRepository.findAllByLabel(labelId).isEmpty()) {
-            throw new UnableDeletionException("Label has active tasks");
-        }
         repository.deleteById(id);
     }
 }

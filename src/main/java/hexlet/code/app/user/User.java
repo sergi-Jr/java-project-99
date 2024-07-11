@@ -56,7 +56,7 @@ public class User implements BaseEntity, UserDetails {
     @LastModifiedDate
     private LocalDate updatedAt;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "assignee", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "assignee", cascade = CascadeType.MERGE)
     private List<Task> tasks = new ArrayList<>();
 
     public void addTask(Task task) {

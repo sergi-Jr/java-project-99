@@ -56,9 +56,7 @@ public class UserService {
 
     @Transactional
     public void delete(Long id) {
-        List<Task> tasks = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found"))
-                .getTasks();
+        List<Task> tasks = taskRepository.findAllByUserId(id);
 
         if (!tasks.isEmpty()) {
             throw new UnableDeletionException("User has active tasks");

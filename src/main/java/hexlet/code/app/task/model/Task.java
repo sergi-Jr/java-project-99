@@ -54,7 +54,7 @@ public class Task implements BaseEntity {
     @ToString.Include
     private TaskStatus taskStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name = "assignee_id", referencedColumnName = "id")
     private User assignee;
 

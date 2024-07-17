@@ -1,6 +1,7 @@
 package hexlet.code.app.label;
 
 import hexlet.code.app.exception.ResourceNotFoundException;
+import hexlet.code.app.exception.UnableDeletionException;
 import hexlet.code.app.label.dto.LabelCreateDTO;
 import hexlet.code.app.label.dto.LabelDTO;
 import hexlet.code.app.label.dto.LabelUpdateDTO;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -51,6 +53,10 @@ public class LabelService {
 
     @Transactional
     public void delete(Long id) {
+        Set<Long> links = repository.getIdFromCrossTable(id);
+        if (!links.isEmpty()) {
+            throw new UnableDeletionException("Label has active tasks");
+        }
         repository.deleteById(id);
     }
 }

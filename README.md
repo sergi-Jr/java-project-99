@@ -9,5 +9,5 @@ To access the resource, enter "hexlet@example.com" as username and "qwerty" as p
 [![Test Coverage](https://api.codeclimate.com/v1/badges/766db98f546e9b18f294/test_coverage)](https://codeclimate.com/github/sergi-Jr/java-project-99/test_coverage)
 
 
-Download archive [zip](https://github.com/sergi-Jr/java-project-99/archive/refs/heads/main.zip).   
+Download archive [zip](https://github.com/sergi-Jr/task-manager/archive/refs/heads/main.zip).   
 
